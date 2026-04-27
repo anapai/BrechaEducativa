@@ -19,7 +19,7 @@ df_long["Año"] = df_long["Año"].astype(int)
 df_filtrado = df_long[df_long["Tipo"].isin(["PÚBLICO", "PRIVADO"])]
 
 
-propuesta garfica 1
+#propuesta garfica 1
 df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
 
 print(df_grafica.head())
