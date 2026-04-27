@@ -10,7 +10,6 @@ df_long = df.melt(
     value_name="Matricula"
 )
 
-
 #FILTRADOSS
 df_long["Matricula"] = df_long["Matricula"].astype(str).str.replace(",", "")
 df_long["Matricula"] = pd.to_numeric(df_long["Matricula"], errors="coerce")
@@ -23,7 +22,7 @@ df_long["Tipo"] = df_long["Tipo"].replace({
 })
 
 df_filtrado = df_long[df_long["Tipo"].isin(["PUBLICO", "PRIVADO"])]
-
+'''
 #propuesta grafica 1
 df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
 for tipo in df_grafica["Tipo"].unique():
@@ -34,4 +33,20 @@ plt.title("Matrícula en México: Público vs Privado")
 plt.xlabel("Año")
 plt.ylabel("Matrícula")
 plt.legend()
+plt.show()
+
+'''
+
+
+
+
+df_pivot = df_filtrado.groupby(["Sector", "Tipo"])["Matricula"].sum().unstack()
+
+df_pivot.plot(kind="bar")
+
+plt.title("Matrícula por Nivel Educativo: Público vs Privado")
+plt.xlabel("Nivel Educativo")
+plt.ylabel("Matrícula")
+plt.xticks(rotation=45)
+
 plt.show()
