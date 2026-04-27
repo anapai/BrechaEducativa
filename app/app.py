@@ -10,11 +10,16 @@ df_long = df.melt(
     value_name="Matricula"
 )
 
+
+#FILTRADOSS
 df_long["Matricula"] = df_long["Matricula"].astype(str).str.replace(",", "")
 df_long["Matricula"] = pd.to_numeric(df_long["Matricula"], errors="coerce")
 df_long["Año"] = df_long["Año"].astype(int)
 
 df_filtrado = df_long[df_long["Tipo"].isin(["PÚBLICO", "PRIVADO"])]
 
-print(df_filtrado.head())
-print(df_filtrado.shape)
+
+propuesta garfica 1
+df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
+
+print(df_grafica.head())
