@@ -1,6 +1,6 @@
 import pandas as pd
-
-df = pd.read_csv("BrechaEducativa/data/serie_historica_entidades_sep.csv", encoding="latin1")
+import matplotlib.pyplot as plt 
+df = pd.read_csv("data/serie_historica_entidades_sep.csv", encoding="latin1")
 
 df.columns = df.columns.str.strip()
 
@@ -15,11 +15,23 @@ df_long = df.melt(
 df_long["Matricula"] = df_long["Matricula"].astype(str).str.replace(",", "")
 df_long["Matricula"] = pd.to_numeric(df_long["Matricula"], errors="coerce")
 df_long["Año"] = df_long["Año"].astype(int)
+df_long["Tipo"] = df_long["Tipo"].astype(str).str.strip()
+df_long["Tipo"] = df_long["Tipo"].replace({
+    "Pï¿½BLICO": "PUBLICO",
+    "PRIVADO": "PRIVADO",
+    "TOTAL": "TOTAL"
+})
 
-df_filtrado = df_long[df_long["Tipo"].isin(["PÚBLICO", "PRIVADO"])]
+df_filtrado = df_long[df_long["Tipo"].isin(["PUBLICO", "PRIVADO"])]
 
-
-#propuesta garfica 1
+#propuesta grafica 1
 df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
+for tipo in df_grafica["Tipo"].unique():
+    data = df_grafica[df_grafica["Tipo"] == tipo]
+    plt.plot(data["Año"], data["Matricula"], label=tipo)
 
-print(df_grafica.head())
+plt.title("Matrícula en México: Público vs Privado")
+plt.xlabel("Año")
+plt.ylabel("Matrícula")
+plt.legend()
+plt.show()
