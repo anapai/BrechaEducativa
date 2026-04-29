@@ -3,6 +3,7 @@ Brecha educativa en México: ¿Cómo varía el acceso a la educación entre los 
 Existen diferencias significativas en el acceso a la educación entre los estados de México, reflejadas en la matrícula y cobertura educativa. 
 
 Brecha educativa en México: Público vs Privado
+Autor: Ana Paula Alvarez Cerda
 
 Pregunta de investigación
 
