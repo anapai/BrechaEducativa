@@ -94,8 +94,7 @@ La aplicación incluye las siguientes gráficas:
 3. Estados con mayor brecha
    Identifica los estados donde existe mayor diferencia entre matrícula pública y privada.
 
-4. Mapa de México (brecha educativa)
-   Visualización geográfica que permite analizar la distribución de la brecha por entidad federativa.
+
 
 Interactividad
 
@@ -129,7 +128,7 @@ Cómo ejecutar el proyecto
 
 1. Clonar el repositorio:
 
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/anapai/BrechaEducativa
 
 2. Crear entorno virtual:
 
