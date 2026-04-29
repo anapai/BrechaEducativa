@@ -1,6 +1,6 @@
 from shiny import App, ui, reactive
 from shinywidgets import output_widget, render_widget
-import pandas as pd
+
 import plotly.express as px
 import json
 
@@ -14,7 +14,7 @@ COLORES_TIPO = {
     "PUBLICO": "#621132",
     "PRIVADO": "#bc955c"
 }
-df = pd.read_csv("BrechaEducativa/data/serie_historica_entidades_sep.csv", encoding="latin1")
+df = pd.read_csv("data/serie_historica_entidades_sep.csv", encoding="latin1")
 df.columns = df.columns.str.strip()
 df_long = df.melt(
     id_vars=["Estado", "Sector", "Tipo"],
@@ -47,7 +47,7 @@ equivalencias_estados = {
 }
 
 df_filtrado["Estado_mapa"] = df_filtrado["Estado"].replace(equivalencias_estados)
-with open("BrechaEducativa/data/states_full.geojson", "r", encoding="utf-8") as f:
+with open("data/states_full.geojson", "r", encoding="utf-8") as f:
     geojson_mexico = json.load(f)
 
 app_ui = ui.page_fluid(
