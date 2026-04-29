@@ -2,11 +2,20 @@ from shiny import App, ui, reactive
 from shinywidgets import output_widget, render_widget
 import pandas as pd
 import plotly.express as px
+import json
 
-df = pd.read_csv("data/serie_historica_entidades_sep.csv", encoding="latin1")
+COLOR_FONDO = "#f7f3ef"
+COLOR_VERDE_OSCURO = "#10312b"
+COLOR_VINO = "#621132"
+COLOR_DORADO = "#bc955c"
+COLOR_TARJETA = "#ffffff"
 
+COLORES_TIPO = {
+    "PUBLICO": "#621132",
+    "PRIVADO": "#bc955c"
+}
+df = pd.read_csv("BrechaEducativa/data/serie_historica_entidades_sep.csv", encoding="latin1")
 df.columns = df.columns.str.strip()
-
 df_long = df.melt(
     id_vars=["Estado", "Sector", "Tipo"],
     var_name="Año",
@@ -24,8 +33,22 @@ df_long["Tipo"] = df_long["Tipo"].replace({
 df_long["Matricula"] = df_long["Matricula"].astype(str).str.replace(",", "")
 df_long["Matricula"] = pd.to_numeric(df_long["Matricula"], errors="coerce")
 df_long["Año"] = df_long["Año"].astype(int)
-
 df_filtrado = df_long[df_long["Tipo"].isin(["PUBLICO", "PRIVADO"])]
+equivalencias_estados = {
+    "Ciudad de Mexico": "Ciudad de México",
+    "Coahuila": "Coahuila de Zaragoza",
+    "Collima": "Colima",
+    "Mexico": "México",
+    "Michoacan": "Michoacán de Ocampo",
+    "Nuevo Leon": "Nuevo León",
+    "Queretaro": "Querétaro",
+    "Veracruz": "Veracruz de Ignacio de la Llave",
+    "Yucatan": "Yucatán"
+}
+
+df_filtrado["Estado_mapa"] = df_filtrado["Estado"].replace(equivalencias_estados)
+with open("BrechaEducativa/data/states_full.geojson", "r", encoding="utf-8") as f:
+    geojson_mexico = json.load(f)
 
 # propuesta grafica 1
 # df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
@@ -59,43 +82,45 @@ df_filtrado = df_long[df_long["Tipo"].isin(["PUBLICO", "PRIVADO"])]
 app_ui = ui.page_fluid(
     ui.tags.style("""
         body {
-            background-color: #0f172a;
+            background-color: #f7f3ef;
             font-family: Arial, sans-serif;
-            color: white;
+            color: #1f2933;
         }
 
         .titulo {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            background: linear-gradient(135deg, #621132, #10312b);
             color: white;
-            padding: 30px;
-            border-radius: 16px;
+            padding: 34px;
+            border-radius: 18px;
             margin-bottom: 25px;
             text-align: center;
-            box-shadow: 0px 4px 14px rgba(0,0,0,0.35);
+            box-shadow: 0px 4px 14px rgba(0,0,0,0.25);
         }
 
         .filtros {
-            background-color: #334155;
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 22px;
             border-radius: 16px;
             margin-bottom: 25px;
-            box-shadow: 0px 3px 10px rgba(0,0,0,0.35);
+            border-left: 8px solid #bc955c;
+            box-shadow: 0px 3px 12px rgba(0,0,0,0.12);
         }
 
         .contenedor {
-            background-color: #1e293b;
-            padding: 24px;
+            background-color: #ffffff;
+            padding: 26px;
             border-radius: 16px;
             margin-bottom: 28px;
-            box-shadow: 0px 3px 12px rgba(0,0,0,0.4);
+            box-shadow: 0px 3px 12px rgba(0,0,0,0.12);
         }
 
         h3 {
-            color: #bfdbfe;
+            color: #621132;
         }
 
         p {
-            color: #e5e7eb;
+            color: #334155;
+            font-size: 16px;
         }
     """),
 
@@ -147,6 +172,14 @@ app_ui = ui.page_fluid(
         ui.p("Aquí se observan los estados donde la diferencia entre matrícula pública y privada es mayor."),
         output_widget("grafica_estado"),
         class_="contenedor"
+    ),
+    
+
+    ui.div(
+        ui.h3("4. Mapa de brecha público-privada por estado"),
+        ui.p("El mapa muestra la diferencia de matrícula entre el sector público y privado según el año y nivel educativo seleccionado."),
+        output_widget("mapa_estado"),
+        class_="contenedor"
     )
 )
 
@@ -169,6 +202,7 @@ def server(input, output, session):
     @render_widget
     def grafica_tiempo():
         data = datos_filtrados()
+        data = data[data["Año"] <= input.anio()]
         df_grafica = data.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
 
         fig = px.line(
@@ -178,16 +212,16 @@ def server(input, output, session):
             color="Tipo",
             markers=True,
             title="Matrícula en México: Público vs Privado",
-            hover_data=["Tipo", "Matricula"]
+            hover_data=["Tipo", "Matricula"], 
+            color_discrete_map=COLORES_TIPO
         )
 
         fig.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="#1e293b",
-            plot_bgcolor="#0f172a",
-            font_color="white"
+            template="plotly_white",
+            paper_bgcolor=COLOR_TARJETA,
+            plot_bgcolor=COLOR_FONDO,
+            font_color="#1f2933"
         )
-
         return fig
 
     @output
@@ -207,14 +241,15 @@ def server(input, output, session):
             color="Tipo",
             barmode="group",
             title=f"Matrícula por nivel educativo en {input.anio()}",
-            hover_data=["Sector", "Tipo", "Matricula"]
+            hover_data=["Sector", "Tipo", "Matricula"],
+            color_discrete_map=COLORES_TIPO
         )
 
         fig.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="#1e293b",
-            plot_bgcolor="#0f172a",
-            font_color="white"
+            template="plotly_white",
+            paper_bgcolor=COLOR_TARJETA,
+            plot_bgcolor=COLOR_FONDO,
+            font_color="#1f2933"
         )
 
         return fig
@@ -244,6 +279,44 @@ def server(input, output, session):
             paper_bgcolor="#1e293b",
             plot_bgcolor="#0f172a",
             font_color="white"
+        )
+
+        return fig
+    
+    @output
+    @render_widget
+    def mapa_estado():
+        data = df_filtrado[df_filtrado["Año"] == input.anio()]
+
+        if input.sector() != "Todos":
+            data = data[data["Sector"] == input.sector()]
+        df_mapa = data.groupby(["Estado", "Estado_mapa", "Tipo"])["Matricula"].sum().unstack().reset_index()
+        df_mapa["Brecha"] = df_mapa["PUBLICO"] - df_mapa["PRIVADO"]
+
+        fig = px.choropleth(
+            df_mapa,
+            geojson=geojson_mexico,
+            locations="Estado_mapa",
+            featureidkey="properties.NOMGEO",
+            color="Brecha",
+            hover_name="Estado",
+            hover_data=["PUBLICO", "PRIVADO", "Brecha"],
+            color_continuous_scale=["#f7f3ef", "#bc955c", "#621132"],
+            title=f"Brecha público-privada por estado en {input.anio()}",
+            
+        )
+
+        fig.update_geos(
+            fitbounds="locations",
+            visible=False
+        )
+
+        fig.update_layout(
+            template="plotly_white",
+            paper_bgcolor=COLOR_TARJETA,
+            plot_bgcolor=COLOR_FONDO,
+            font_color="#1f2933",
+            margin={"r": 0, "t": 50, "l": 0, "b": 0}
         )
 
         return fig
