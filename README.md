@@ -158,7 +158,6 @@ Aplicación en línea
 https://r8tr6j-ana0pau.shinyapps.io/brechaeducativa/
 
 
-
 Referencias:
 *https://shiny.posit.co/py/get-started/debug.html
 *https://www.planeacion.sep.gob.mx/estadisticaeducativas.aspx
