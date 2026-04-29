@@ -50,35 +50,6 @@ df_filtrado["Estado_mapa"] = df_filtrado["Estado"].replace(equivalencias_estados
 with open("BrechaEducativa/data/states_full.geojson", "r", encoding="utf-8") as f:
     geojson_mexico = json.load(f)
 
-# propuesta grafica 1
-# df_grafica = df_filtrado.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
-# for tipo in df_grafica["Tipo"].unique():
-#     data = df_grafica[df_grafica["Tipo"] == tipo]
-#     plt.plot(data["Año"], data["Matricula"], label=tipo)
-# plt.title("Matrícula en México: Público vs Privado")
-# plt.xlabel("Año")
-# plt.ylabel("Matrícula")
-# plt.legend()
-
-# propuesta grafica 2
-# df_pivot = df_filtrado.groupby(["Sector", "Tipo"])["Matricula"].sum().unstack()
-# df_pivot.plot(kind="bar")
-# plt.title("Matrícula por Nivel Educativo: Público vs Privado")
-# plt.xlabel("Nivel Educativo")
-# plt.ylabel("Matrícula")
-# plt.xticks(rotation=45)
-
-# propuesta grafica 3
-# df_estado = df_filtrado.groupby(["Estado", "Tipo"])["Matricula"].sum().unstack()
-# df_estado["Diferencia"] = df_estado["PUBLICO"] - df_estado["PRIVADO"]
-# df_estado = df_estado.sort_values(by="Diferencia", ascending=False)
-# top_estados = df_estado.head(10)
-# top_estados["Diferencia"].plot(kind="bar")
-# plt.title("Estados con mayor brecha educativa (Público - Privado)")
-# plt.xlabel("Estado")
-# plt.ylabel("Diferencia de Matrícula")
-# plt.xticks(rotation=45)
-
 app_ui = ui.page_fluid(
     ui.tags.style("""
         body {
@@ -125,9 +96,16 @@ app_ui = ui.page_fluid(
     """),
 
     ui.div(
-        ui.h1("Educación pública vs privada en México"),
-        ui.p("Análisis interactivo de matrícula por estado, nivel educativo y año."),
-        class_="titulo"
+        ui.h3("Pregunta de investigación"),
+        ui.p("¿Cómo se distribuye la matrícula entre educación pública y privada en México, y cómo cambia esta diferencia según el estado, el nivel educativo y el año?"),
+
+        ui.h3("Hipótesis"),
+        ui.p("La educación pública concentra la mayor parte de la matrícula en México; sin embargo, la participación de la educación privada varía según el nivel educativo y la entidad federativa."),
+
+        ui.h3("Narrativa del análisis"),
+        ui.p("Primero se observa la evolución nacional de la matrícula pública y privada. Después, se comparan los niveles educativos para identificar dónde la participación privada tiene mayor peso. Finalmente, se analiza la brecha territorial entre estados mediante un ranking y un mapa interactivo."),
+
+        class_="contenedor"
     ),
 
     ui.div(
@@ -154,21 +132,21 @@ app_ui = ui.page_fluid(
     ),
 
     ui.div(
-        ui.h3("1. Matrícula pública vs privada en el tiempo"),
+    ui.p("El primer paso es observar la tendencia nacnal: la matrícula pública domina el sistema educativo, pero la comparación con la matrícula privada permite identificar cambios a lo largo del tiempo."),
         ui.p("Esta gráfica muestra la evolución de la matrícula pública y privada a lo largo de los años."),
         output_widget("grafica_tiempo"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.h3("2. Matrícula por nivel educativo"),
+    ui.p("La brecha no se comporta igual en todos los niveles educativos. Esta gráfica permite comparar en qué etapa escolar la educación privada tiene mayor o menor presencia."),
         ui.p("Esta visualización compara la matrícula pública y privada según el nivel educativo."),
         output_widget("grafica_nivel"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.h3("3. Estados con mayor brecha público-privada"),
+    ui.p("Después de observar el comportamiento general, esta gráfica identifica los estados donde la diferencia entre matrícula pública y privada es más amplia."),
         ui.p("Aquí se observan los estados donde la diferencia entre matrícula pública y privada es mayor."),
         output_widget("grafica_estado"),
         class_="contenedor"
@@ -176,7 +154,7 @@ app_ui = ui.page_fluid(
     
 
     ui.div(
-        ui.h3("4. Mapa de brecha público-privada por estado"),
+    ui.p("El mapa permite ubicar territorialmente la brecha público-privada y observar cómo cambia al seleccionar diferentes anos."),
         ui.p("El mapa muestra la diferencia de matrícula entre el sector público y privado según el año y nivel educativo seleccionado."),
         output_widget("mapa_estado"),
         class_="contenedor"
