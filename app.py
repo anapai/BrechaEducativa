@@ -97,6 +97,18 @@ app_ui = ui.page_fluid(
             border: 1px solid #e5e7eb;
         }
 
+        .contenedor h3 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .contenedor p {
+            color: #475569;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
         .filtros {
             background-color: white;
             padding: 24px;
@@ -147,19 +159,22 @@ app_ui = ui.page_fluid(
     ),
 
     ui.div(
-        ui.p("El primer paso es observar la tendencia nacional."),
+        ui.h3("1. Evolución de la matrícula pública y privada"),
+        ui.p("Esta gráfica muestra cómo ha cambiado la matrícula pública y privada a lo largo del tiempo. Permite observar si la educación pública mantiene mayor presencia frente a la privada y si esa diferencia aumenta o disminuye con los años."),
         output_widget("grafica_tiempo"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.p("Comparación por nivel educativo."),
+        ui.h3("2. Comparación por nivel educativo"),
+        ui.p("Aquí se compara la matrícula pública y privada según el nivel educativo seleccionado. Esta gráfica ayuda a identificar en qué niveles la educación privada tiene mayor participación y en cuáles domina más claramente la educación pública."),
         output_widget("grafica_nivel"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.p("Estados con mayor brecha."),
+        ui.h3("3. Estados con mayor brecha educativa"),
+        ui.p("Esta gráfica presenta los estados donde la diferencia entre matrícula pública y privada es más grande. Sirve para analizar en qué entidades la educación pública concentra más estudiantes frente al sector privado."),
         output_widget("grafica_estado"),
         class_="contenedor"
     )
@@ -193,14 +208,17 @@ def server(input, output, session):
             y="Matricula",
             color="Tipo",
             markers=True,
-            color_discrete_map=COLORES_TIPO
+            color_discrete_map=COLORES_TIPO,
+            title="Evolución histórica de la matrícula"
         )
 
         fig.update_layout(
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color=COLOR_TEXTO
+            font_color=COLOR_TEXTO,
+            xaxis_title="Año",
+            yaxis_title="Matrícula"
         )
 
         return fig
@@ -219,14 +237,17 @@ def server(input, output, session):
             y="Matricula",
             color="Tipo",
             barmode="group",
-            color_discrete_map=COLORES_TIPO
+            color_discrete_map=COLORES_TIPO,
+            title="Matrícula pública y privada por nivel educativo"
         )
 
         fig.update_layout(
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color=COLOR_TEXTO
+            font_color=COLOR_TEXTO,
+            xaxis_title="Nivel educativo",
+            yaxis_title="Matrícula"
         )
 
         return fig
@@ -240,7 +261,7 @@ def server(input, output, session):
         df_estado = data.groupby(["Estado", "Tipo"])["Matricula"].sum().unstack().reset_index()
 
         if "PUBLICO" not in df_estado.columns or "PRIVADO" not in df_estado.columns:
-            return px.bar()
+            return px.bar(title="No hay datos suficientes para calcular la brecha")
 
         df_estado["Brecha"] = df_estado["PUBLICO"] - df_estado["PRIVADO"]
         df_estado = df_estado.sort_values(by="Brecha", ascending=False).head(10)
@@ -249,14 +270,17 @@ def server(input, output, session):
             df_estado,
             x="Estado",
             y="Brecha",
-            color_discrete_sequence=[COLOR_AZUL]
+            color_discrete_sequence=[COLOR_AZUL],
+            title="Top 10 estados con mayor brecha entre educación pública y privada"
         )
 
         fig.update_layout(
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color=COLOR_TEXTO
+            font_color=COLOR_TEXTO,
+            xaxis_title="Estado",
+            yaxis_title="Diferencia de matrícula"
         )
 
         return fig
