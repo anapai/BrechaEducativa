@@ -19,6 +19,7 @@ Los datos utilizados provienen de la Secretaría de Educación Pública (SEP), e
 Archivo utilizado:
 
 * serie_historica_entidades_sep.csv
+Sabado 18 de Abril del 2026. Descargable principal "Serie histórica y pronósticos de la estadística del Sistema Educativo Nacional".
 
 Fuente oficial:
 https://www.planeacion.sep.gob.mx/estadisticaeducativas.aspx
