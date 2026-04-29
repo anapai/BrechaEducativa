@@ -2,10 +2,10 @@
     "https://api.shinyapps.io": {
         "server_url": "https://api.shinyapps.io",
         "filename": "C:\\Users\\anapa\\OneDrive\\Desktop\\BrechaEducativa\\BrechaEducativa",
-        "app_url": "https://r8tr6j-ana0pau.shinyapps.io/brechaeducativaaaa/",
-        "app_id": "17253881",
+        "app_url": "https://r8tr6j-ana0pau.shinyapps.io/brechaeducativa/",
+        "app_id": "17254046",
         "app_guid": null,
-        "title": "brechaeducativaaaa",
+        "title": "BrechaEducativa",
         "app_mode": "python-shiny",
         "app_store_version": 1
     }

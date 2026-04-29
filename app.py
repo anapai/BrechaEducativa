@@ -1,7 +1,7 @@
-from shiny import App, ui, reactive, render
+from shiny import App, ui, reactive
+from shinywidgets import output_widget, render_widget
 import pandas as pd
 import plotly.express as px
-import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -22,20 +22,18 @@ for carpeta in posibles_data:
 if DATA_DIR is None:
     raise FileNotFoundError("No se encontró la carpeta data con el archivo serie_historica_entidades_sep.csv")
 
-COLOR_FONDO = "#f7f3ef"
-COLOR_VINO = "#621132"
-COLOR_DORADO = "#bc955c"
+COLOR_FONDO = "#f4f6f8"
 COLOR_TARJETA = "#ffffff"
+COLOR_TEXTO = "#1f2937"
+COLOR_AZUL = "#2563eb"
+COLOR_GRIS = "#64748b"
 
 COLORES_TIPO = {
-    "PUBLICO": "#621132",
-    "PRIVADO": "#bc955c"
+    "PUBLICO": "#2563eb",
+    "PRIVADO": "#64748b"
 }
 
 df = pd.read_csv(DATA_DIR / "serie_historica_entidades_sep.csv", encoding="latin1")
-
-with open(DATA_DIR / "states_full.geojson", "r", encoding="utf-8") as f:
-    geojson_mexico = json.load(f)
 
 df.columns = df.columns.str.strip()
 
@@ -59,69 +57,53 @@ df_long["Año"] = df_long["Año"].astype(int)
 
 df_filtrado = df_long[df_long["Tipo"].isin(["PUBLICO", "PRIVADO"])].copy()
 
-equivalencias_estados = {
-    "Ciudad de Mexico": "Ciudad de México",
-    "Coahuila": "Coahuila de Zaragoza",
-    "Collima": "Colima",
-    "Mexico": "México",
-    "Michoacan": "Michoacán de Ocampo",
-    "Nuevo Leon": "Nuevo León",
-    "Queretaro": "Querétaro",
-    "Veracruz": "Veracruz de Ignacio de la Llave",
-    "Yucatan": "Yucatán"
-}
-
-df_filtrado["Estado_mapa"] = df_filtrado["Estado"].replace(equivalencias_estados)
-
-def fig_to_ui(fig):
-    return ui.HTML(fig.to_html(include_plotlyjs=False, full_html=False))
-
-def mensaje_sin_datos():
-    return ui.p("No hay datos disponibles para esta selección.")
-
 app_ui = ui.page_fluid(
-    ui.tags.script(src="https://cdn.plot.ly/plotly-2.35.2.min.js"),
-
     ui.tags.style("""
         body {
-            background-color: #f7f3ef;
-            font-family: Arial, sans-serif;
-            color: #1f2933;
+            background-color: #f4f6f8;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1f2937;
         }
 
         .titulo {
-            background: linear-gradient(135deg, #621132, #10312b);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
             color: white;
-            padding: 34px;
+            padding: 42px;
             border-radius: 18px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             text-align: center;
+            box-shadow: 0px 8px 24px rgba(15, 23, 42, 0.22);
+        }
+
+        .titulo h1 {
+            color: white;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .titulo p {
+            color: #e5e7eb;
+            font-size: 17px;
         }
 
         .contenedor {
             background-color: white;
-            padding: 26px;
+            padding: 28px;
             border-radius: 16px;
-            margin-bottom: 28px;
-            box-shadow: 0px 3px 12px rgba(0,0,0,0.12);
+            margin-bottom: 26px;
+            box-shadow: 0px 4px 16px rgba(15, 23, 42, 0.08);
+            border: 1px solid #e5e7eb;
         }
 
         .filtros {
             background-color: white;
-            padding: 22px;
+            padding: 24px;
             border-radius: 16px;
-            margin-bottom: 25px;
-            border-left: 8px solid #bc955c;
-            box-shadow: 0px 3px 12px rgba(0,0,0,0.12);
-        }
-
-        h3 {
-            color: #621132;
-        }
-
-        p {
-            color: #334155;
-            font-size: 16px;
+            margin-bottom: 26px;
+            border-left: 6px solid #2563eb;
+            box-shadow: 0px 4px 16px rgba(15, 23, 42, 0.08);
         }
     """),
 
@@ -137,7 +119,7 @@ app_ui = ui.page_fluid(
         ui.h3("Hipótesis"),
         ui.p("La educación pública concentra la mayor parte de la matrícula en México; sin embargo, la participación de la educación privada varía según el nivel educativo y la entidad federativa."),
         ui.h3("Narrativa del análisis"),
-        ui.p("Primero se observa la evolución nacional. Después se comparan los niveles educativos. Finalmente se analiza la brecha territorial mediante un ranking y un mapa interactivo."),
+        ui.p("Primero se observa la evolución nacional. Después se comparan los niveles educativos. Finalmente se analiza la brecha territorial mediante un ranking por estado."),
         class_="contenedor"
     ),
 
@@ -165,26 +147,20 @@ app_ui = ui.page_fluid(
     ),
 
     ui.div(
-        ui.p("El primer paso es observar la tendencia nacional: la matrícula pública domina el sistema educativo, pero la comparación con la matrícula privada permite identificar cambios a lo largo del tiempo."),
-        ui.output_ui("grafica_tiempo"),
+        ui.p("El primer paso es observar la tendencia nacional."),
+        output_widget("grafica_tiempo"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.p("La brecha no se comporta igual en todos los niveles educativos. Esta gráfica permite comparar en qué etapa escolar la educación privada tiene mayor o menor presencia."),
-        ui.output_ui("grafica_nivel"),
+        ui.p("Comparación por nivel educativo."),
+        output_widget("grafica_nivel"),
         class_="contenedor"
     ),
 
     ui.div(
-        ui.p("Después de observar el comportamiento general, esta gráfica identifica los estados donde la diferencia entre matrícula pública y privada es más amplia."),
-        ui.output_ui("grafica_estado"),
-        class_="contenedor"
-    ),
-
-    ui.div(
-        ui.p("El mapa permite ubicar territorialmente la brecha público-privada y observar cómo cambia al seleccionar diferentes años."),
-        ui.output_ui("mapa_estado"),
+        ui.p("Estados con mayor brecha."),
+        output_widget("grafica_estado"),
         class_="contenedor"
     )
 )
@@ -204,18 +180,12 @@ def server(input, output, session):
         return data
 
     @output
-    @render.ui
+    @render_widget
     def grafica_tiempo():
         data = datos_filtrados()
         data = data[data["Año"] <= input.anio()]
 
-        if data.empty:
-            return mensaje_sin_datos()
-
         df_grafica = data.groupby(["Año", "Tipo"])["Matricula"].sum().reset_index()
-
-        if df_grafica.empty:
-            return mensaje_sin_datos()
 
         fig = px.line(
             df_grafica,
@@ -223,7 +193,6 @@ def server(input, output, session):
             y="Matricula",
             color="Tipo",
             markers=True,
-            title="Matrícula en México: Público vs Privado",
             color_discrete_map=COLORES_TIPO
         )
 
@@ -231,24 +200,18 @@ def server(input, output, session):
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color="#1f2933"
+            font_color=COLOR_TEXTO
         )
 
-        return fig_to_ui(fig)
+        return fig
 
     @output
-    @render.ui
+    @render_widget
     def grafica_nivel():
         data = datos_filtrados()
         data = data[data["Año"] == input.anio()]
 
-        if data.empty:
-            return mensaje_sin_datos()
-
         df_nivel = data.groupby(["Sector", "Tipo"])["Matricula"].sum().reset_index()
-
-        if df_nivel.empty:
-            return mensaje_sin_datos()
 
         fig = px.bar(
             df_nivel,
@@ -256,7 +219,6 @@ def server(input, output, session):
             y="Matricula",
             color="Tipo",
             barmode="group",
-            title=f"Matrícula por nivel educativo en {input.anio()}",
             color_discrete_map=COLORES_TIPO
         )
 
@@ -264,92 +226,39 @@ def server(input, output, session):
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color="#1f2933"
+            font_color=COLOR_TEXTO
         )
 
-        return fig_to_ui(fig)
+        return fig
 
     @output
-    @render.ui
+    @render_widget
     def grafica_estado():
         data = datos_filtrados()
         data = data[data["Año"] == input.anio()]
 
-        if data.empty:
-            return mensaje_sin_datos()
-
         df_estado = data.groupby(["Estado", "Tipo"])["Matricula"].sum().unstack().reset_index()
 
         if "PUBLICO" not in df_estado.columns or "PRIVADO" not in df_estado.columns:
-            return mensaje_sin_datos()
+            return px.bar()
 
         df_estado["Brecha"] = df_estado["PUBLICO"] - df_estado["PRIVADO"]
         df_estado = df_estado.sort_values(by="Brecha", ascending=False).head(10)
-
-        if df_estado.empty:
-            return mensaje_sin_datos()
 
         fig = px.bar(
             df_estado,
             x="Estado",
             y="Brecha",
-            title=f"Top 10 estados con mayor brecha público-privada en {input.anio()}",
-            color_discrete_sequence=[COLOR_VINO]
+            color_discrete_sequence=[COLOR_AZUL]
         )
 
         fig.update_layout(
             template="plotly_white",
             paper_bgcolor=COLOR_TARJETA,
             plot_bgcolor=COLOR_FONDO,
-            font_color="#1f2933"
+            font_color=COLOR_TEXTO
         )
 
-        return fig_to_ui(fig)
-
-    @output
-    @render.ui
-    def mapa_estado():
-        data = datos_filtrados()
-        data = data[data["Año"] == input.anio()]
-
-        if data.empty:
-            return mensaje_sin_datos()
-
-        df_mapa = data.groupby(["Estado", "Estado_mapa", "Tipo"])["Matricula"].sum().unstack().reset_index()
-
-        if "PUBLICO" not in df_mapa.columns or "PRIVADO" not in df_mapa.columns:
-            return mensaje_sin_datos()
-
-        df_mapa["Brecha"] = df_mapa["PUBLICO"] - df_mapa["PRIVADO"]
-
-        if df_mapa.empty:
-            return mensaje_sin_datos()
-
-        fig = px.choropleth(
-            df_mapa,
-            geojson=geojson_mexico,
-            locations="Estado_mapa",
-            featureidkey="properties.NOMGEO",
-            color="Brecha",
-            hover_name="Estado",
-            hover_data=["PUBLICO", "PRIVADO", "Brecha"],
-            color_continuous_scale=["#f7f3ef", "#bc955c", "#621132"],
-            title=f"Brecha público-privada por estado en {input.anio()}"
-        )
-
-        fig.update_geos(
-            fitbounds="locations",
-            visible=False
-        )
-
-        fig.update_layout(
-            template="plotly_white",
-            paper_bgcolor=COLOR_TARJETA,
-            plot_bgcolor=COLOR_FONDO,
-            font_color="#1f2933",
-            margin={"r": 0, "t": 50, "l": 0, "b": 0}
-        )
-
-        return fig_to_ui(fig)
+        return fig
 
 app = App(app_ui, server)

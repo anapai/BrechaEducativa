@@ -155,6 +155,7 @@ Principales hallazgos
 * La brecha público-privada cambia con el tiempo y el contexto regional
 
 Aplicación en línea
+https://r8tr6j-ana0pau.shinyapps.io/brechaeducativa/
 
 
 
